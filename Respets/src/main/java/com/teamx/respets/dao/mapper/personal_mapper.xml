@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamx.respets.dao.PersonalDao">
+
+	<!-- 개인 최근예약리스트 -->
+	<select id="recentMyBookingList" parameterType="HashMap"
+		resultType="HashMap">
+		<![CDATA[SELECT X.RNUM, X.BK_NO, X.BUS_NAME, X.PTY_NAME, X.PET_NO, X.PET_NAME, X.PER_NAME, X.BK_TIME, X.VS_START, X.BK_CHK
+                    FROM (
+                    SELECT ROWNUM AS RNUM, RC.BK_NO, RC.BUS_NAME, RC.PTY_NAME, RC.PET_NO, RC.PET_NAME, RC.PER_NAME, RC.BK_TIME, RC.VS_START, RC.BK_CHK
+                        FROM (
+                        SELECT BK_NO, BUS_NAME, PTY_NAME, PET_NO, PET_NAME, PER_NAME, TO_CHAR(BK_TIME, 'yyyy-mm-dd hh24:mi')AS BK_TIME, VS_START, BK_CHK
+                        FROM RECENTMYBOOKINGLIST_VIEW
+                        WHERE PER_NO=#{no}
+                        ORDER BY BK_TIME DESC)RC
+                    WHERE ROWNUM <= ${pageNum} * 10)X
+                    WHERE X.RNUM >= ${pageNum} * 10-9 ]]>
+	</select>
+
+	<!-- 개인 최근예약리스트 카운트 -->
+	<select id="recentMyBookingListCount" parameterType="String"
+		resultType="int">
+		SELECT COUNT(*) FROM RECENTMYBOOKINGLIST_VIEW WHERE
+		PER_NO=#{no}
+	</select>
+
+	<!-- 내 예약 디테일 -->
+	<select id="myBookingDetail" parameterType="String"
+		resultType="HashMap">
+		SELECT BK.BK_NO, BUS.BUS_NAME , BUS.BUS_PHONE,
+		BUS.BUS_ADDR, BUS.BUS_ADDR2
+		,PTY.PTY_NAME,
+		PET.PET_NAME, PER.PER_NAME,
+		PER.PER_PHONE, TO_CHAR(BK.VS_START, 'yyyy-mm-dd
+		hh24:mi') AS VS_START,
+		EMP.EMP_NAME, BK.BK_CMT, PET.PET_NO
+		FROM BK
+		INNER JOIN PET
+		ON BK.PET_NO =
+		PET.PET_NO
+		INNER JOIN PTY
+		ON PET.PTY_NO =
+		PTY.PTY_NO
+		INNER JOIN PER
+		ON
+		BK.PER_NO = PER.PER_NO
+		INNER JOIN BUS
+		ON
+		BK.BUS_NO = BUS.BUS_NO
+		INNER JOIN
+		EMP
+		ON BK.EMP_NO = EMP.EMP_NO
+		WHERE BK.BK_NO = #{bk_no}
+	</select>
+
+	<!-- 개인 예약디테일 서비스 불러오기 -->
+	<select id="getMenu" parameterType="String" resultType="HashMap">
+		SELECT
+		MENU.MENU_NAME FROM MENU INNER JOIN BKM
+		ON MENU.MENU_NO = BKM.MENU_NO
+		INNER JOIN BK
+		ON BKM.BK_NO = BK.BK_NO
+		WHERE BK.BK_NO = #{bk_no}
+	</select>
+
+	<!-- 개인 예약디테일 동물정보 -->
+	<select id="getPetDetail" parameterType="String"
+		resultType="HashMap">
+		SELECT PCL.PCL_NAME, PDT.PDT_CTT FROM PCL INNER JOIN PDT
+		ON
+		PCL.PCL_NO = PDT.PCL_NO
+		WHERE PDT.PET_NO=#{pet_no}
+	</select>
+
+	<!-- 개인 회원정보 페이지 -->
+	<select id="myInfo" resultType="personal" parameterType="String">
+		SELECT *
+		FROM PER WHERE PER_NO = #{no}
+	</select>
+
+	<!-- 개인 비밀번호 수정 -->
+	<update id="myPwUpdate" parameterType="personal">
+		UPDATE PER SET PER_PW =
+		#{per_pw} WHERE PER_NO = #{per_no}
+	</update>
+
+	<!-- 개인 현제 비번과 받아온 비번 비교 ajax -->
+	<select id="myPwCheck" resultType="int" parameterType="personal">
+		SELECT
+		COUNT(*) FROM PER WHERE PER_NO = #{per_no} AND PER_PW = #{per_pw}
+	</select>
+
+	<!-- 개인 정보 사진 수정 -->
+	<update id="perPhotoUpdate" parameterType="personal">
+		UPDATE PER SET
+		PER_PHONE = #{per_phone}, PER_PHOTO = #{per_photo}, PER_LOC =
+		#{per_loc} WHERE PER_NO = #{per_no}
+	</update>
+
+	<!-- 개인 정보 사진 없을 때 -->
+	<update id="perNoPhotoUpdate" parameterType="personal">
+		UPDATE PER SET
+		PER_PHONE = #{per_phone} WHERE PER_NO = #{per_no}
+	</update>
+
+	<!-- 개인 회원탈퇴 -->
+	<update id="personalPartDelete" parameterType="String">
+		UPDATE PER SET
+		PER_LEAVE = 'O', PER_LTIME = SYSDATE WHERE PER_NO = #{no}
+	</update>
+
+	<!-- 예약 취소 방문날 -->
+	<select id="getBkStart" resultType="Date" parameterType="String">
+		SELECT
+		VS_START FROM BK WHERE BK_NO = #{bk_no}
+	</select>
+
+	<!-- 예약 취소 -->
+	<insert id="cancelInsert" parameterType="Hashmap">
+		INSERT INTO CAN
+		VALUES(#{bk_no}, SYSDATE, (SELECT CAR_CRG FROM CAR WHERE CAR_DAY =
+		#{count}))
+	</insert>
+
+	<!-- 예약 취소 -->
+	<update id="bk_chkUpdate" parameterType="String">
+		UPDATE BK SET BK_CHK =
+		'취소' WHERE BK_NO = (SELECT BK_NO FROM CAN WHERE BK_NO = #{bk_no})
+	</update>
+
+	<!-- 개인 예약 전체리스트 -->
+	<select id="allBookingList" resultType="Hashmap"
+		parameterType="String">
+		<![CDATA[
+		SELECT X.* FROM 
+		(SELECT ROWNUM AS RNUM, SEL.* FROM 
+		(SELECT BK.BK_NO, BUS.BUS_NAME, PTY.PTY_NAME, PET.PET_NAME, PER.PER_NAME,
+		 TO_CHAR(BK.BK_TIME, 'YYYY-MM-DD HH24:MI') AS BK_TIME, 
+		 TO_CHAR(BK.VS_START, 'YYYY-MM-DD HH24:MI') AS VS_START, BK.BK_CHK 
+		 FROM BK INNER JOIN BUS ON BK.BUS_NO = BUS.BUS_NO 
+		 INNER JOIN PET ON BK.PET_NO = PET.PET_NO 
+		 INNER JOIN PTY ON PET.PTY_NO = PTY.PTY_NO 
+		 INNER JOIN PER ON BK.PER_NO = PER.PER_NO 
+		 WHERE PER_NO = #{no} 
+		 ORDER BY BK.BK_NO DESC) SEL 
+		 WHERE ROWNUM <= ${page_no} * 10) X 
+		 WHERE X.RNUM >= ${page_no} * 10 - 9
+		]]>
+	</select>
+
+	<!-- 개인 예약 전체리스트 페이징 -->
+	<select id="contPerBkList" resultType="int">
+		SELECT COUNT(*) FROM BK
+		WHERE PER_NO = #{no}
+	</select>
+
+	<!-- 동물 종류 번호 -->
+	<select id="getPetTypeNo" resultType="String"
+		parameterType="String">
+		SELECT PTY_NO FROM PTY WHERE PTY_NAME=#{value}
+	</select>
+	<!-- 동물 종류명 -->
+	<select id="getPetTypeName" resultType="String"
+		parameterType="String">
+		SELECT PTY_NAME FROM PTY WHERE PTY_NO=#{value}
+	</select>
+	<!-- 동물 종류 추가 -->
+	<insert id="petTypeInsert" parameterType="String">
+		INSERT INTO PTY VALUES
+		(PTY_SEQ.NEXTVAL,#{value})
+	</insert>
+
+	<!-- 반려동물 목록 -->
+	<select id="getPetList" resultType="pet" parameterType="String">
+		SELECT *
+		FROM PET WHERE PER_NO=#{value}
+	</select>
+	<!-- 반려동물 전체상세정보 -->
+	<select id="getPetInfoDetail" resultType="pet"
+		parameterType="String">
+		SELECT * FROM PET WHERE PET_NO=#{value}
+	</select>
+	<!-- 반려동물 필수정보 등록 (사진 첨부X) -->
+	<insert id="petInsert" parameterType="pet">
+		INSERT INTO PET
+		VALUES('A'||PET_SEQ.NEXTVAL,#{per_no},#{pty_no},#{pet_vrt},
+		#{pet_name},#{pet_age},#{pet_sex},#{pet_ntr},default,default)
+	</insert>
+	<!-- 반려동물 필수정보 등록 (사진 첨부O) -->
+	<insert id="petAndPhotoInsert" parameterType="pet">
+		INSERT INTO PET
+		VALUES('A'||PET_SEQ.NEXTVAL,#{per_no},#{pty_no},#{pet_vrt},
+		#{pet_name},#{pet_age},#{pet_sex},#{pet_ntr},#{pet_photo},#{pet_loc})
+	</insert>
+	<!-- 반려동물 필수정보 수정 (사진 첨부X) -->
+	<update id="petUpdate" parameterType="pet">
+		UPDATE PET SET
+		PTY_NO=#{pty_no},PET_VRT=#{pet_vrt},PET_NAME=#{pet_name},
+		PET_AGE=#{pet_age},PET_SEX=#{pet_sex},PET_NTR=#{pet_ntr} WHERE
+		PET_NO=#{pet_no}
+	</update>
+	<!-- 반려동물 필수정보 수정 (사진 첨부O) -->
+	<update id="petAndPhotoUpdate" parameterType="pet">
+		UPDATE PET SET
+		PTY_NO=#{pty_no},PET_VRT=#{pet_vrt},PET_NAME=#{pet_name},
+		PET_AGE=#{pet_age},PET_SEX=#{pet_sex},PET_NTR=#{pet_ntr},
+		PET_PHOTO=#{pet_photo},PET_LOC=#{pet_loc} WHERE PET_NO=#{pet_no}
+	</update>
+	<!-- 반려동물 삭제 -->
+	<delete id="petDelete" parameterType="String">
+		DELETE PET WHERE
+		PET_NO=#{value}
+	</delete>
+
+	<!-- 반려동물 선택정보 등록 -->
+	<insert id="pdtInsert" parameterType="pet"
+		useGeneratedKeys="true" keyProperty="pet_no">
+		INSERT INTO PDT VALUES(#{pet_no},#{pcl_no},#{pdt_ctt})
+		<selectKey keyProperty="pet_no" resultType="String"
+			order="BEFORE">
+			SELECT PET_NO FROM PET WHERE PER_NO=#{per_no} and
+			PET_NAME=#{pet_name}
+		</selectKey>
+	</insert>
+	<!-- 반려동물 선택정보 수정 -->
+	<update id="pdtUpdate" parameterType="pet">
+		UPDATE PDT SET
+		PDT_CTT=#{pdt_ctt} WHERE PET_NO=#{pet_no} AND
+		PCL_NO=#{pcl_no}
+	</update>
+	<!-- 반려동물 선택정보 -->
+	<select id="getPdtCtt" resultType="String" parameterType="pet">
+		SELECT
+		PDT_CTT FROM PDT WHERE PET_NO=#{pet_no} AND PCL_NO=#{pcl_no}
+	</select>
+	<!-- 반려동물 선택정보 삭제 -->
+	<delete id="pdtDelete" parameterType="pet">
+		DELETE FROM PDT WHERE
+		PET_NO=#{pet_no} AND PCL_NO=#{pcl_no}
+	</delete>
+	<!-- 반려동물 선택정보 전체삭제 -->
+	<delete id="pdtAllDelete" parameterType="String">
+		DELETE FROM PDT WHERE
+		PET_NO=#{value}
+	</delete>
+	<!-- 반려동물 선택정보 목록 -->
+	<select id="getPdt" resultType="HashMap" parameterType="String">
+		SELECT *
+		FROM PDT WHERE PET_NO=#{value}
+	</select>
+	
+	<!-- 개인 캘린더 -->
+	<select id="getPerCalendar" resultType="HashMap"
+		parameterType="String">
+		SELECT PER_NAME, BK_NO, PET_NAME, BUS_NAME, BCT_NAME,
+		EMP_NAME,
+		TO_CHAR(VS_START, 'yyyy-mm-dd hh24:mi') VS_START, BUS_ADDR,
+		BUS_ADDR2,
+		TO_CHAR(VS_END, 'yyyy-mm-dd hh24:mi') VS_END
+		FROM BK JOIN PER
+		ON BK.PER_NO = PER.PER_NO
+		JOIN PET
+		ON BK.PET_NO = PET.PET_NO
+		JOIN BUS
+		ON
+		BK.BUS_NO = BUS.BUS_NO
+		JOIN BCT
+		ON BK.BCT_CODE = BCT.BCT_CODE
+		JOIN EMP
+		ON
+		BK.EMP_NO = EMP.EMP_NO
+		WHERE BK.PER_NO=#{no}
+	</select>
+	
+	<!-- 개인 즐겨찾기 기업 SELECT -->
+	<select id="likeBusinessSelect" parameterType="String" resultType="HashMap">
+		SELECT FAV.PER_NO, BUS.BUS_NO, BUS.BUS_NAME, GLR.GLR_FILE, GLR.GLR_LOC, SVC.BCT_CODE
+        FROM FAV INNER JOIN BUS
+		ON FAV.BUS_NO = BUS.BUS_NO
+		INNER JOIN GLR
+		ON BUS.BUS_NO = GLR.BUS_NO
+		INNER JOIN SVC
+		ON FAV.BUS_NO = SVC.BUS_NO
+		WHERE FAV.PER_NO = #{per_no} AND GLR.GCT_NO = 2 AND SVC.SVC_PRI = 1
+	</select>
+
+	<!-- 개인 즐겨찾기 삭제 -->
+	<delete id="likeBusinessDelete" parameterType="HashMap">
+		DELETE FROM FAV WHERE PER_NO = #{per_no} AND BUS_NO = #{bus_no}
+	</delete>
+</mapper>

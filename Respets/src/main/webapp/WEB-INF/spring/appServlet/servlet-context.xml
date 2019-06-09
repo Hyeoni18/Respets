@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+	<context:component-scan
+		base-package="com.teamx.respets" />
+
+	<!-- JDBC : Connection 1개만 존재 // IP 주소, 사용자 아이디, 비밀번호 적어주는 -->
+	<beans:bean id="dataSourceSpied"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName"
+			value="net.sf.log4jdbc.DriverSpy" />
+		<beans:property name="url"
+			value="jdbc:log4jdbc:oracle:thin:@192.168.219.101:1521:xe" />
+		<beans:property name="username" value="TeamX" />
+		<beans:property name="password" value="respets" />
+	</beans:bean>
+
+	<!-- 쿼리문 로그 출력을 위해 추가 -->
+	<beans:bean id="dataSource"
+		class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<beans:constructor-arg ref="dataSourceSpied" />
+		<beans:property name="logFormatter">
+			<beans:bean
+				class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<beans:property name="loggingType" value="MULTI_LINE" />
+				<beans:property name="sqlPrefix" value="SQL : " />
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
+	<!-- sqlSessionFactory :: mybatis가 사용 -->
+	<beans:bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="configLocation"
+			value="classpath:com/teamx/respets/dao/mybatis-conf.xml" />
+		<beans:property name="mapperLocations"
+			value="classpath:com/**/mapper/*.xml" />
+	</beans:bean>
+
+	<!-- 트랜잭션 -->
+	<beans:bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<beans:property name="dataSource" ref="dataSource" />
+	</beans:bean>
+	<tx:annotation-driven
+		transaction-manager="transactionManager" />
+	
+	<!-- 관리자 Dao -->
+	<beans:bean id="aDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<beans:property name="sqlSessionFactory"
+			ref="sqlSessionFactory" />
+		<beans:property name="mapperInterface"
+			value="com.teamx.respets.dao.AdminDao" />
+	</beans:bean>
+	
+	<!-- business Dao -->
+	<beans:bean id="bDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<beans:property name="sqlSessionFactory"
+			ref="sqlSessionFactory" />
+		<beans:property name="mapperInterface"
+			value="com.teamx.respets.dao.BusinessDao" />
+	</beans:bean>
+	
+	<!-- 로그인 Dao -->
+	<beans:bean id="lDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<beans:property name="sqlSessionFactory"
+			ref="sqlSessionFactory" />
+		<beans:property name="mapperInterface"
+			value="com.teamx.respets.dao.LoginDao" />
+	</beans:bean>
+	
+	<!-- main Dao -->
+	<beans:bean id="mDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<beans:property name="sqlSessionFactory"
+			ref="sqlSessionFactory" />
+		<beans:property name="mapperInterface"
+			value="com.teamx.respets.dao.MainDao" />
+	</beans:bean>
+	
+	<!-- Personal Dao -->
+	<beans:bean id="pDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<beans:property name="sqlSessionFactory"
+			ref="sqlSessionFactory" />
+		<beans:property name="mapperInterface"
+			value="com.teamx.respets.dao.PersonalDao" />
+	</beans:bean>
+
+	<!-- MultipartResolver 설정 -->
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	</beans:bean>
+
+	<!-- Session Interceptor -->
+	<interceptors>
+		<interceptor>
+			<!-- mapping의 모든 요청은 Controller에 도착하기 전에 가로챈다. -->
+			<mapping path="/*" />
+			<!-- exclude-mapping의 요청은 가로채지 않는다. -->
+			<!-- "/" 추가하지 않으면 무한 루프 -->
+			<exclude-mapping path="/" />
+			<exclude-mapping path="/loginProcess" />
+			<exclude-mapping path="/loginForm" />
+			<exclude-mapping path="/joinChoiceForm" />
+			<exclude-mapping path="/personalJoinAgreement" />
+			<exclude-mapping path="/personalJoinForm" />
+			<exclude-mapping path="/personalJoin" />
+			<exclude-mapping path="/emailConfirmOffer" />
+			<exclude-mapping path="/emailConfirmSuccess" />
+			<exclude-mapping path="/admin" />
+			<exclude-mapping path="/adminLogin" />
+			<exclude-mapping path="/businessBasicInfo" />
+			<exclude-mapping path="/businessGallery" />
+			<exclude-mapping path="/businessDetailNoticeList" />
+			<exclude-mapping path="/businessNoticeDetail"/>
+			<exclude-mapping path="/dashboard" />
+			<exclude-mapping path="/businessDetailPage" />
+			<exclude-mapping path="/favoriteChange" />
+			<exclude-mapping path="/personalCalendar" />
+			<exclude-mapping path="/businessJoinAgreement" /> 
+			<exclude-mapping path="/businessJoinForm" /> 
+			<exclude-mapping path="/emailCheck" /> 
+			<exclude-mapping path="/taxIdCheck" />
+			<exclude-mapping path="/businessJoin" />
+			<exclude-mapping path="/businessList" /> 
+			<exclude-mapping path="/searchList" />
+			<exclude-mapping path="/findMyIdForm" />
+			<exclude-mapping path="/findMyId" /> 
+			<exclude-mapping path="/findMyPw" /> 
+			<exclude-mapping path="/resetMyPwForm" />
+			<exclude-mapping path="/updateMyPw" /> 
+			<exclude-mapping path="/tagSelectList" />
+			<exclude-mapping path="/butTagSelectList" /> 
+			<exclude-mapping path="/tagSelectListAddr" />
+			<exclude-mapping path="/butTagSelectListPaging" />
+			<!-- Intercepter에 의해 가로챈 요청을 체크하는 클래스 -->
+			<beans:bean
+				class="com.teamx.respets.userClass.SessionInterceptor"></beans:bean>
+		</interceptor>
+	</interceptors>
+
+</beans:beans>
