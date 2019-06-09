@@ -81,7 +81,7 @@
   - 앞 페이지에서 넘어온 값을 사용하여 DB에서 리스트를 검색 후 해당 기업들이 가지고 있는 키워드가 <span> 태그로 구현
   - 리스트가 9건이 넘을 경우 페이지네이션 처리
 
-![BusinessListPage](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-1.gif)
+![BusinessListPage](./image/KakaoTalk_Photo_2019-05-31-20-47-18-1.gif)
 
 <center><strong>업종 선택 후 보여진 리스트에서 페이징과 키워드 검색이 된 것을 보여준다.</strong></center>
 
@@ -96,15 +96,15 @@
   - 메일에는 비밀번호 변경 폼 주소와 난수가 함께 보내져 타인이 악용하지 못하도록 방지
   - 메일은 30분이 지나면 옳은 URL이라도 사용이 불가능
 
-![findId&sendMail](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-5.gif)
+![findId&sendMail](./image/KakaoTalk_Photo_2019-05-31-20-47-18-5.gif)
 
 <center><strong>아이디(email)을 찾은 후 해당 메일로 비밀번호 변경 폼 주소 보내기</strong></center>
 
-![okmail](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-9.gif)
+![okmail](./image/KakaoTalk_Photo_2019-05-31-20-47-18-9.gif)
 
 <center><strong>받은 주소를 통해 비밀번호 변경</strong></center>
 
-![nomail](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-10.gif)
+![nomail](./image/KakaoTalk_Photo_2019-05-31-20-47-18-10.gif)
 
 <center><strong>받은 메일이 30분이 지나면 해당 주소는 유효하지 않다.</strong></center>
 
@@ -117,7 +117,7 @@
 - 방문 상태
   - Ajax를 통해 방문, 취소를 구현하여 현황 파악을 도와줌
 
-![BusinessTodayWorkList](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-4.gif)
+![BusinessTodayWorkList](./image/KakaoTalk_Photo_2019-05-31-20-47-18-4.gif)
 
 <center><strong>오늘 예약된 리스트 / 방문 상태 확인</strong></center>
 
@@ -132,7 +132,7 @@
   - 보호자 이름과 업종을 통해 특정 회원의 예약 리스트를 검색
   - 리스트가 10건이 넘을 경우 페이지네이션 처리
 
-![BusinessAllListSearch](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-3.gif)
+![BusinessAllListSearch](./image/KakaoTalk_Photo_2019-05-31-20-47-18-3.gif)
 
 <center><strong>전체 예약 목록 / 페이징 / 예약자 검색</strong></center>
 
@@ -151,15 +151,15 @@
   - 연관된 DB 테이블에 on delete cascade를 설정하여 해당 업종을 삭제할 경우 관련된 모든 데이터가 삭제되도록 구현
   - 트랜잭션을 통해 하나의 데이터라도 잘못될 경우 모든 데이터가 Rollback 됨
 
-![BusinessServiceInsert](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-6.gif)
+![BusinessServiceInsert](./image/KakaoTalk_Photo_2019-05-31-20-47-18-6.gif)
 
 <center><strong>기업 서비스 등록</strong></center>
 
-![BusinessServiceUpdate](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-8.gif)
+![BusinessServiceUpdate](./image/KakaoTalk_Photo_2019-05-31-20-47-18-8.gif)
 
 <center><strong>기업 서비스 가격 수정</strong></center>
 
-![BusinessServiceDelete](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-7.gif)
+![BusinessServiceDelete](./image/KakaoTalk_Photo_2019-05-31-20-47-18-7.gif)
 
 <center><strong>기업 서비스 삭제</strong></center>
 
@@ -172,7 +172,7 @@
 - 직원 등록
   - 등록 시 해당 업종의 업무시간, 점심시간, 휴무일 값을 가져와 가이드라인을 생성
 
-![BusinessEmployee](/Users/hahyunhwi/Downloads/KakaoTalk_Photo_2019-05-31-20-47-18-2.gif)
+![BusinessEmployee](./image/KakaoTalk_Photo_2019-05-31-20-47-18-2.gif)
 
 <center><strong>직원 등록 (업종의 휴무일은 변경 불가능)</strong></center>
 
