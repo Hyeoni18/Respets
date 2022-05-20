@@ -94,7 +94,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.8.5</version>
+			<version>2.8.9</version>
 		</dependency>
 		<!-- DTO와 엔티티간 변환을 위한 ModelMapper -->
 		<dependency>
