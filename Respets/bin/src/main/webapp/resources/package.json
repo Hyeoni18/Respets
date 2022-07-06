@@ -66,7 +66,7 @@
     "metismenu": "^2.7.4",
     "moment": "^2.18.1",
     "popper.js": "^1.14.3",
-    "select2": "^4.0.6-rc.1",
+    "select2": "^4.0.6",
     "simplemde": "^1.11.2",
     "summernote": "^0.8.10",
     "twitter-bootstrap-wizard": "^1.2.0"
